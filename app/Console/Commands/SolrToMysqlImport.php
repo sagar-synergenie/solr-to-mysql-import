@@ -59,11 +59,13 @@ class SolrToMysqlImport extends Command
 
     public function getDataFromCSV()
     {
+        Log::info('Process Started');
         $sqlObject = array();
         $recordCount = 0;
         $chunkSize = (int)env("CHUNK_SIZE");
         Excel::filter('chunk')->load($this->fileName)->chunk($chunkSize, function($results) use (&$recordCount,$chunkSize)
         {
+            Log::info('Inside Chunk Function');
             foreach($results as $row)
             {
                 //echo "<pre>";print_r($row->email);
@@ -100,5 +102,6 @@ class SolrToMysqlImport extends Command
             HackRecord::insert($sqlObject);
             $sqlObject = array();
         },false);
+        Log::info('Process End!');
     }
 }
