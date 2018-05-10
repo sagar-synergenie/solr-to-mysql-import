@@ -62,7 +62,7 @@ class SolrToMysqlImport extends Command
         $sqlObject = array();
         $recordCount = 0;
         $chunkSize = (int)env("CHUNK_SIZE");
-        Excel::filter('chunk')->load(public_path($this->fileName))->chunk($chunkSize, function($results) use (&$recordCount,$chunkSize)
+        Excel::filter('chunk')->load($this->fileName)->chunk($chunkSize, function($results) use (&$recordCount,$chunkSize)
         {
             foreach($results as $row)
             {
