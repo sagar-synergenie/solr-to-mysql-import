@@ -6,6 +6,7 @@ error_reporting(E_ALL ^ E_DEPRECATED);
 ini_set('max_execution_time', 0);
 use App\HackRecord;
 use App\HackSource;
+use App\MissingHackSourceRecord;
 use Illuminate\Console\Command;
 use Cassandra;
 use Illuminate\Support\Facades\Cache;
@@ -94,6 +95,12 @@ class CassandraToMysqlImport extends Command
                     }
                     //Log::info("Sourceid::". $row['sourceid']->uuid()."::recordid::".$row['recordid']->uuid()."::email::".$row['email']);
                     //Log::info($row['isremoved']);
+                    if(array_key_exists($row['sourceid']->uuid(), $this->hackSources)) {
+                        $sourceValue = $this->hackSources[$row['sourceid']->uuid()];
+                    }else{
+                        $sourceValue = null;
+                        MissingHackSourceRecord::create(['email'=>$row['email'],'sourceid'=>$row['sourceid']->uuid(),'recordid' => $row['recordid']->uuid()]);
+                    }
                     $data = [
                         'email' => checkIsEmpty($row['email']),
                         'sourceid' => $row['sourceid']->uuid(),
@@ -111,7 +118,7 @@ class CassandraToMysqlImport extends Command
                         'dateinserted' => date('Y-m-d H:i:s'),
                         'emaildomain' => checkIsEmpty($row['emaildomain']),
                         'phonenumber' => checkIsEmptyAndRetrievePhone($row['attributes']),
-                        'hack_source_id' => $this->hackSources[$row['sourceid']->uuid()]
+                        'hack_source_id' => $sourceValue
                     ];
                     $sqlObject[] = $data;
                     //echo "<pre>";print_r($row);
