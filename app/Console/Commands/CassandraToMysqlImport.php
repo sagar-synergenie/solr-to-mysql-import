@@ -67,6 +67,7 @@ class CassandraToMysqlImport extends Command
     public function handle()
     {
         try{
+            Log::info("Process started.");
             $index = 1;
             $sqlObject = array();
             $query = "SELECT * FROM $this->hackRecord";
