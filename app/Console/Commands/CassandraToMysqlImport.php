@@ -94,35 +94,52 @@ class CassandraToMysqlImport extends Command
                         Log::info("Total record inserted:: $index");
                     }
                     //Log::info("Sourceid::". $row['sourceid']->uuid()."::recordid::".$row['recordid']->uuid()."::email::".$row['email']);
-                    //Log::info($row['isremoved']);
                     if(array_key_exists($row['sourceid']->uuid(), $this->hackSources)) {
                         $sourceValue = $this->hackSources[$row['sourceid']->uuid()];
+                        $data = [
+                            'email' => checkIsEmpty($row['email']),
+                            'sourceid' => $row['sourceid']->uuid(),
+                            'recordid' => $row['recordid']->uuid(),
+                            'attributes' => checkIsEmptyJson($row['attributes']),
+                            'firstname' => checkIsEmpty($row['firstname']),
+                            'ipaddress' => checkIsEmpty($row['ipaddress']),
+                            'isdataclean' => checkIsEmptyConvertBoolean($row['isdataclean']),
+                            'isremoved' => checkIsEmptyConvertBoolean($row['isremoved']),
+                            'lastname' => checkIsEmpty($row['lastname']),
+                            'password' => checkIsEmpty($row['password']),
+                            'passwordhash' => checkIsEmpty($row['passwordhash']),
+                            'username' => checkIsEmpty($row['username']),
+                            'status' => checkIsEmpty($row['status']),
+                            'dateinserted' => date('Y-m-d H:i:s'),
+                            'emaildomain' => checkIsEmpty($row['emaildomain']),
+                            'phonenumber' => checkIsEmptyAndRetrievePhone($row['attributes']),
+                            'hack_source_id' => $sourceValue
+                        ];
+                        $sqlObject[] = $data;
+                        $index = $index + 1;
                     }else{
                         $sourceValue = null;
-                        MissingHackSourceRecord::create(['email'=>$row['email'],'sourceid'=>$row['sourceid']->uuid(),'recordid' => $row['recordid']->uuid()]);
+                        MissingHackSourceRecord::create(
+                            [
+                                'email' => checkIsEmpty($row['email']),
+                                'sourceid' => $row['sourceid']->uuid(),
+                                'recordid' => $row['recordid']->uuid(),
+                                'attributes' => checkIsEmptyJson($row['attributes']),
+                                'firstname' => checkIsEmpty($row['firstname']),
+                                'ipaddress' => checkIsEmpty($row['ipaddress']),
+                                'isdataclean' => checkIsEmptyConvertBoolean($row['isdataclean']),
+                                'isremoved' => checkIsEmptyConvertBoolean($row['isremoved']),
+                                'lastname' => checkIsEmpty($row['lastname']),
+                                'password' => checkIsEmpty($row['password']),
+                                'passwordhash' => checkIsEmpty($row['passwordhash']),
+                                'username' => checkIsEmpty($row['username']),
+                                'status' => checkIsEmpty($row['status']),
+                                'dateinserted' => date('Y-m-d H:i:s'),
+                                'emaildomain' => checkIsEmpty($row['emaildomain']),
+                                'phonenumber' => checkIsEmptyAndRetrievePhone($row['attributes'])
+                            ]
+                        );
                     }
-                    $data = [
-                        'email' => checkIsEmpty($row['email']),
-                        'sourceid' => $row['sourceid']->uuid(),
-                        'recordid' => $row['recordid']->uuid(),
-                        'attributes' => checkIsEmptyJson($row['attributes']),
-                        'firstname' => checkIsEmpty($row['firstname']),
-                        'ipaddress' => checkIsEmpty($row['ipaddress']),
-                        'isdataclean' => checkIsEmptyConvertBoolean($row['isdataclean']),
-                        'isremoved' => checkIsEmptyConvertBoolean($row['isremoved']),
-                        'lastname' => checkIsEmpty($row['lastname']),
-                        'password' => checkIsEmpty($row['password']),
-                        'passwordhash' => checkIsEmpty($row['passwordhash']),
-                        'username' => checkIsEmpty($row['username']),
-                        'status' => checkIsEmpty($row['status']),
-                        'dateinserted' => date('Y-m-d H:i:s'),
-                        'emaildomain' => checkIsEmpty($row['emaildomain']),
-                        'phonenumber' => checkIsEmptyAndRetrievePhone($row['attributes']),
-                        'hack_source_id' => $sourceValue
-                    ];
-                    $sqlObject[] = $data;
-                    //echo "<pre>";print_r($row);
-                    $index = $index + 1;
                 }
                 foreach (array_chunk($sqlObject, 1000) as $sqlData) {
                     HackRecord::insert($sqlData);
