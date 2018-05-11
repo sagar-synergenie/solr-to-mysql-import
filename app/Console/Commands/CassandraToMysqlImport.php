@@ -5,8 +5,10 @@ namespace App\Console\Commands;
 error_reporting(E_ALL ^ E_DEPRECATED);
 ini_set('max_execution_time', 0);
 use App\HackRecord;
+use App\HackSource;
 use Illuminate\Console\Command;
 use Cassandra;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
@@ -38,6 +40,7 @@ class CassandraToMysqlImport extends Command
     protected $keySpace;
     protected $cassandraTimeout;
     protected $pageSize;
+    protected $hackSources;
 
     /**
      * Create a new command instance.
@@ -68,6 +71,10 @@ class CassandraToMysqlImport extends Command
     {
         try{
             Log::info("Process started.");
+            if(Cache::get('hack_sources') == null){
+                $this->getAllHackSources();
+            }
+            $this->hackSources = Cache::get('hack_sources');
             $index = 1;
             $sqlObject = array();
             $query = "SELECT * FROM $this->hackRecord";
@@ -104,6 +111,7 @@ class CassandraToMysqlImport extends Command
                         'dateinserted' => date('Y-m-d H:i:s'),
                         'emaildomain' => checkIsEmpty($row['emaildomain']),
                         'phonenumber' => checkIsEmptyAndRetrievePhone($row['attributes']),
+                        'hack_source_id' => $this->hackSources[$row['sourceid']->uuid()]
                     ];
                     $sqlObject[] = $data;
                     //echo "<pre>";print_r($row);
@@ -138,6 +146,15 @@ class CassandraToMysqlImport extends Command
             ->withPort($this->cassandraPort)
             ->build();
         $this->session = $this->cluster->connect($this->keySpace);
+    }
+
+    public function getAllHackSources()
+    {
+        $hackSources = HackSource::all();
+        foreach($hackSources as $hackSource){
+            $data[$hackSource->sourceid] = $hackSource->id;
+        }
+        Cache::forever('hack_sources', $data);
     }
 }
 

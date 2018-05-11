@@ -15,6 +15,7 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         'App\Console\Commands\SolrToMysqlImport',
         'App\Console\Commands\CassandraToMysqlImport',
+        'App\Console\Commands\ImportHackSource',
     ];
 
     /**
