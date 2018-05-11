@@ -67,3 +67,21 @@ function checkIsEmptyJson($value)
         return null;
     }
 }
+
+function checkIsEmptyPassword($value)
+{
+    $value = trim($value);
+    if(!is_null($value) && strlen($value) > 0){
+        if($value == "{}"){
+            return null;
+        }elseif($value == ""){
+            return null;
+        }elseif(strlen($value) > 1000) {
+            return null;
+        }else{
+            return $value;
+        }
+    }else{
+        return null;
+    }
+}
