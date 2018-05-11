@@ -28,7 +28,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('inspire')
         //          ->hourly();
         //$schedule->command('mysql:import')->monthlyOn((int)env("CRON_DAY"), env("CRON_TIME"));
-        //$schedule->command('cassandra-sql:import')->monthlyOn((int)env("CRON_DAY"), env("CRON_TIME"));
+        $schedule->command('cassandra-sql:import')->monthlyOn((int)env("CRON_DAY"), env("CRON_TIME"));
     }
 
     /**
