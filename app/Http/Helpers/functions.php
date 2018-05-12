@@ -78,6 +78,8 @@ function checkIsEmptyPassword($value)
             return null;
         }elseif(strlen($value) > 1000) {
             return null;
+        }elseif(strpos($value, '\\') !== false || strpos($value, '?') !== false){
+            return null;
         }else{
             return $value;
         }
@@ -94,7 +96,7 @@ function checkIsEmptyUsername($value)
         }elseif($value == ""){
             return null;
         }elseif(strpos($value, '\\') !== false || strpos($value, '?') !== false) {
-            return true;
+            return null;
         }else{
             return $value;
         }
