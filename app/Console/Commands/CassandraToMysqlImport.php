@@ -86,7 +86,7 @@ class CassandraToMysqlImport extends Command
             while (true) {
                 //$batch = new Cassandra\BatchStatement();
                 foreach ($result as $row) {
-                    if($index % 500000 == 0) {
+                    if($index % 1000000 == 0) {
                         Mail::raw("Total record inserted:: $index", function ($message){
                             $message->to(env("USER_EMAIL"));
                             $message->subject("DB:import Record Count ");
@@ -108,7 +108,7 @@ class CassandraToMysqlImport extends Command
                             'lastname' => checkIsEmpty($row['lastname']),
                             'password' => checkIsEmptyPassword($row['password']),
                             'passwordhash' => checkIsEmpty($row['passwordhash']),
-                            'username' => checkIsEmpty($row['username']),
+                            'username' => checkIsEmptyUsername($row['username']),
                             'status' => checkIsEmpty($row['status']),
                             'dateinserted' => date('Y-m-d H:i:s'),
                             'emaildomain' => checkIsEmpty($row['emaildomain']),
@@ -132,7 +132,7 @@ class CassandraToMysqlImport extends Command
                                 'lastname' => checkIsEmpty($row['lastname']),
                                 'password' => checkIsEmptyPassword($row['password']),
                                 'passwordhash' => checkIsEmpty($row['passwordhash']),
-                                'username' => checkIsEmpty($row['username']),
+                                'username' => checkIsEmptyUsername($row['username']),
                                 'status' => checkIsEmpty($row['status']),
                                 'dateinserted' => date('Y-m-d H:i:s'),
                                 'emaildomain' => checkIsEmpty($row['emaildomain']),

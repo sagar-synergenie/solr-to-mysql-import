@@ -85,3 +85,20 @@ function checkIsEmptyPassword($value)
         return null;
     }
 }
+function checkIsEmptyUsername($value)
+{
+    $value = trim($value);
+    if(!is_null($value) && strlen($value) > 0){
+        if($value == "{}"){
+            return null;
+        }elseif($value == ""){
+            return null;
+        }elseif(strpos($value, '\\') !== false || strpos($value, '?') !== false) {
+            return true;
+        }else{
+            return $value;
+        }
+    }else{
+        return null;
+    }
+}
