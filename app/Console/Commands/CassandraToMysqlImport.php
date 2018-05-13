@@ -116,7 +116,9 @@ class CassandraToMysqlImport extends Command
                             'phonenumber' => checkIsEmptyAndRetrievePhone($row['attributes']),
                             'hack_source_id' => $sourceValue
                         ];
-                        $sqlObject[] = $data;
+                        $job = (new BatchInsertToMysql($data))->onQueue('high');
+                        dispatch($job);
+                        //$sqlObject[] = $data;
                         $index = $index + 1;
                     }else{
                         $sourceValue = null;
@@ -143,8 +145,8 @@ class CassandraToMysqlImport extends Command
                     }
                 }
 
-                $job = (new BatchInsertToMysql($sqlObject))->onQueue('high');
-                dispatch($job);
+                /*$job = (new BatchInsertToMysql($sqlObject))->onQueue('high');
+                dispatch($job);*/
                 /*foreach (array_chunk($sqlObject, 3000) as $sqlData) {
                     HackRecord::insert($sqlData);
                 }*/
