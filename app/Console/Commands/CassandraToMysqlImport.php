@@ -6,6 +6,7 @@ error_reporting(E_ALL ^ E_DEPRECATED);
 ini_set('max_execution_time', 0);
 use App\HackRecord;
 use App\HackSource;
+use App\Jobs\BatchInsertToMysql;
 use App\MissingHackSourceRecord;
 use Illuminate\Console\Command;
 use Cassandra;
@@ -141,9 +142,9 @@ class CassandraToMysqlImport extends Command
                         );
                     }
                 }
-                foreach (array_chunk($sqlObject, 1000) as $sqlData) {
-                    HackRecord::insert($sqlData);
-                }
+
+                $job = (new BatchInsertToMysql($sqlObject))->onQueue('high');
+                dispatch($job);
                 $sqlObject = array();
                 //$updateResult = $this->sessionInsert->executeAsync($batch);
                 if ($result->isLastPage()) { break; }
