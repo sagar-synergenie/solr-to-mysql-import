@@ -35,7 +35,7 @@ class BatchInsertToMysql implements ShouldQueue
     public function handle()
     {
         try{
-            foreach (array_chunk($this->sqlObject, 1000) as $sqlData) {
+            foreach (array_chunk($this->sqlObject, 3000) as $sqlData) {
                 HackRecord::insert($sqlData);
             }
         }catch (\Exception $e){
