@@ -21,6 +21,7 @@ class BatchInsertToMysql implements ShouldQueue
      * @return void
      */
     public $sqlObject;
+
     public function __construct($sqlObject)
     {
         $this->sqlObject = $sqlObject;
@@ -34,15 +35,14 @@ class BatchInsertToMysql implements ShouldQueue
     public function handle()
     {
         try{
-            /*foreach (array_chunk($this->sqlObject, 1000) as $sqlData) {
+            foreach (array_chunk($this->sqlObject, 1000) as $sqlData) {
                 HackRecord::insert($sqlData);
-            }*/
-            HackRecord::create($this->sqlObject);
+            }
         }catch (\Exception $e){
             Log::critical($e);
             Mail::raw($e, function ($message){
                 $message->to(env("USER_EMAIL"));
-                $message->subject("DB:import Error:QueueJob");
+                $message->subject("DB:import Error:QueuedJob");
             });
         }
     }
