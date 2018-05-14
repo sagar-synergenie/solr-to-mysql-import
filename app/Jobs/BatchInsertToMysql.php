@@ -42,7 +42,7 @@ class BatchInsertToMysql implements ShouldQueue
             Log::critical($e);
             Mail::raw($e, function ($message){
                 $message->to(env("USER_EMAIL"));
-                $message->subject("DB:import Error:QueuedJob");
+                $message->subject("Queue:DB:import Error:QueuedJob");
             });
         }
     }

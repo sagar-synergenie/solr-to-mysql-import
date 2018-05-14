@@ -143,11 +143,11 @@ class CassandraToMysqlImport extends Command
                     }
                 }
 
-                /*$job = (new BatchInsertToMysql($sqlObject))->onQueue('high');
-                dispatch($job);*/
-                foreach (array_chunk($sqlObject, 3000) as $sqlData) {
+                $job = (new BatchInsertToMysql($sqlObject))->onQueue('high');
+                dispatch($job);
+                /*foreach (array_chunk($sqlObject, 3000) as $sqlData) {
                     HackRecord::insert($sqlData);
-                }
+                }*/
                 $sqlObject = array();
                 //$updateResult = $this->sessionInsert->executeAsync($batch);
                 if ($result->isLastPage()) { break; }
@@ -157,7 +157,7 @@ class CassandraToMysqlImport extends Command
             Log::critical($e);
             Mail::raw($e, function ($message){
                 $message->to(env("USER_EMAIL"));
-                $message->subject("DB:import Error");
+                $message->subject("Queue:DB:import Error");
             });
         }
     }
