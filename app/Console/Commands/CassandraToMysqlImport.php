@@ -145,7 +145,8 @@ class CassandraToMysqlImport extends Command
                 }
                 $uuid4 = Uuid::uuid4();
                 $uuidNumber = $uuid4->toString();
-                Cache::forever($uuidNumber, $data);
+                $expiresAt = now()->addDays(30);
+                Cache::put($uuidNumber, $data,$expiresAt);
                 $job = (new BatchInsertToMysql($uuidNumber))->onQueue('high');
                 //$job = (new BatchInsertToMysql($sqlObject))->onQueue('high');
                 dispatch($job);
