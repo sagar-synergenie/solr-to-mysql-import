@@ -143,11 +143,11 @@ class CassandraToMysqlImport extends Command
                         );
                     }
                 }
-                /*$uuid4 = Uuid::uuid4();
+                $uuid4 = Uuid::uuid4();
                 $uuidNumber = $uuid4->toString();
                 Cache::forever($uuidNumber, $data);
-                $job = (new BatchInsertToMysql($uuidNumber))->onQueue('high');*/
-                $job = (new BatchInsertToMysql($sqlObject))->onQueue('high');
+                $job = (new BatchInsertToMysql($uuidNumber))->onQueue('high');
+                //$job = (new BatchInsertToMysql($sqlObject))->onQueue('high');
                 dispatch($job);
                 /*foreach (array_chunk($sqlObject, 3000) as $sqlData) {
                     HackRecord::insert($sqlData);
