@@ -13,6 +13,7 @@ use Cassandra;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Ramsey\Uuid\Uuid;;
 
 class CassandraToMysqlImport extends Command
 {
@@ -142,8 +143,10 @@ class CassandraToMysqlImport extends Command
                         );
                     }
                 }
-
-                $job = (new BatchInsertToMysql($sqlObject))->onQueue('high');
+                $uuid4 = Uuid::uuid4();
+                $uuidNumber = $uuid4->toString();
+                Cache::forever($uuidNumber, $data);
+                $job = (new BatchInsertToMysql($uuidNumber))->onQueue('high');
                 dispatch($job);
                 /*foreach (array_chunk($sqlObject, 3000) as $sqlData) {
                     HackRecord::insert($sqlData);

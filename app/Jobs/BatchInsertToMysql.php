@@ -10,6 +10,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Cache;
 
 class BatchInsertToMysql implements ShouldQueue
 {
@@ -35,9 +36,10 @@ class BatchInsertToMysql implements ShouldQueue
     public function handle()
     {
         try{
-            foreach (array_chunk($this->sqlObject, 3000) as $sqlData) {
+            foreach (array_chunk(Cache::get($this->sqlObject), 3000) as $sqlData) {
                 HackRecord::insert($sqlData);
             }
+            Cache::forget($this->sqlObject);
         }catch (\Exception $e){
             Log::critical($e);
             Mail::raw($e, function ($message){
