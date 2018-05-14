@@ -90,7 +90,7 @@ class CassandraToMysqlImport extends Command
                     if($index % 1000000 == 0) {
                         Mail::raw("Total record inserted:: $index", function ($message){
                             $message->to(env("USER_EMAIL"));
-                            $message->subject("DB:import Record Count ");
+                            $message->subject("Queue:DB:import Record Count ");
                         });
                         Log::info("Total record inserted:: $index");
                     }
