@@ -146,10 +146,10 @@ class CassandraToMysqlImport extends Command
 
                 /*$job = (new BatchInsertToMysql($sqlObject))->onQueue('high');
                 dispatch($job);*/
-                /*foreach (array_chunk($sqlObject, 3000) as $sqlData) {
+                foreach (array_chunk($sqlObject, 3000) as $sqlData) {
                     HackRecord::insert($sqlData);
-                }*/
-                HackRecord::insert($sqlObject);
+                }
+                //HackRecord::insert($sqlObject);
                 $sqlObject = array();
                 //$updateResult = $this->sessionInsert->executeAsync($batch);
                 if ($result->isLastPage()) { break; }
