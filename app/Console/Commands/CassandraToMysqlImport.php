@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 error_reporting(E_ALL ^ E_DEPRECATED);
 ini_set('max_execution_time', 0);
+ini_set('memory_limit', '10024M');
 use App\HackRecord;
 use App\HackSource;
 use App\Jobs\BatchInsertToMysql;
