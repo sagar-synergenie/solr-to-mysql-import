@@ -20,18 +20,18 @@ function checkIsEmptyConvertBoolean($value)
     $value = trim($value);
     if(!is_null($value) && strlen($value) > 0){
         if($value == "{}"){
-            return null;
+            return 0;
         }elseif($value == ""){
-            return null;
+            return 0;
         }else {
             if($value == 'TRUE' || $value == TRUE){
-                return TRUE;
+                return 1;
             }elseif($value == 'FALSE' || $value == FALSE){
-                return FALSE;
+                return 0;
             }
         }
     }else{
-        return null;
+        return 0;
     }
 }
 
@@ -60,8 +60,10 @@ function checkIsEmptyJson($value)
             return null;
         }elseif($value == ""){
             return null;
-        }else {
+        }elseif(is_object(json_decode($value))) {
             return json_encode(json_decode($value));
+        }else{
+            return null;
         }
     }else{
         return null;
