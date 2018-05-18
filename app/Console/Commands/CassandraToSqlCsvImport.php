@@ -124,7 +124,7 @@ class CassandraToSqlCsvImport extends Command
                 $this->getAllHackSources();
             }
             $output = fopen($csv,"w") or die("Can't open php://output");
-            fputcsv($output, array('hack_source_id','email','emaildomain','username','firstname','lastname','password','passwordhash','ipaddress','phonenumber','attributes','status','isdataclean','isremoved','dateinserted'),";");
+            fputcsv($output, array('source_id','email','emaildomain','username','firstname','lastname','password','passwordhash','ipaddress','phonenumber','attributes','status','isdataclean','isremoved','dateinserted'),";");
             $this->hackSources = Cache::get('hack_sources');
             $index = 1;
             $sqlObject = array();
@@ -143,7 +143,7 @@ class CassandraToSqlCsvImport extends Command
                         $this->fileName = $this->fileName($fileNameIndex);
                         $csv = storage_path("csv/$this->fileName");
                         $output = fopen($csv,"w") or die("Can't open php://output");
-                        fputcsv($output, array('hack_source_id','email','emaildomain','username','firstname','lastname','password','passwordhash','ipaddress','phonenumber','attributes','status','isdataclean','isremoved','dateinserted'),";");
+                        fputcsv($output, array('source_id','email','emaildomain','username','firstname','lastname','password','passwordhash','ipaddress','phonenumber','attributes','status','isdataclean','isremoved','dateinserted'),";");
                     }
                     //Log::info("Sourceid::". $row['sourceid']->uuid()."::recordid::".$row['recordid']->uuid()."::email::".$row['email']);
                     if(array_key_exists($row['sourceid']->uuid(), $this->hackSources)) {
