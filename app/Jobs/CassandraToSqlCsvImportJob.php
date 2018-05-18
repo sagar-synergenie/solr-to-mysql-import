@@ -56,6 +56,7 @@ class CassandraToSqlCsvImportJob implements ShouldQueue
             Log::info("Total record inserted:: $this->index");
         }catch (\Exception $e){
             Log::critical($e);
+            $e = $e."\n\nFileName::$this->fileName\n\n::Index Number::$this->index";
             Mail::raw($e, function ($message){
                 $message->to(env("USER_EMAIL"));
                 $message->subject("DB:import Error Queue");
