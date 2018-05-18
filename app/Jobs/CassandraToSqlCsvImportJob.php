@@ -49,10 +49,10 @@ class CassandraToSqlCsvImportJob implements ShouldQueue
 
             DB::connection()->getpdo()->exec($query);
 
-            Mail::raw("Total record inserted:: $this->index", function ($message){
+            /*Mail::raw("Total record inserted:: $this->index", function ($message){
                 $message->to(env("USER_EMAIL"));
                 $message->subject("DB:import Record Count ");
-            });
+            });*/
             Log::info("Total record inserted:: $this->index");
         }catch (\Exception $e){
             Log::critical($e);
