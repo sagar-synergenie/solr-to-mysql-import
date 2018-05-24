@@ -53,7 +53,10 @@ class HomeController extends Controller
 
         $entityType = "email";
         $entityFilter = "sagar@gmail.com";
-        $response = $this->getData($entityType,$entityFilter,$firstRequest,$forward,$backward);
+        $scannerRequest = new ScannerRequest();
+        $scannerRequest->addEntityFilter($entityType, $entityFilter);
+        $cassandraObject = new CassandraQuery($scannerRequest);
+        $response = $cassandraObject->getData($entityType,$entityFilter,$firstRequest,$forward,$backward);
         $cassandraPagination = Cache::get('cassandra_pagination');
         $total = $cassandraPagination['records'];
         /*if(is_null($cassandraPagination['next'])){
@@ -79,92 +82,87 @@ class HomeController extends Controller
         return $finalData;
     }
 
-    public function getData($entityType, $entityFilter,$firstRequest,$forward,$backward)
+    public function getData1($entityType, $entityFilter,$firstRequest,$forward,$backward)
     {
-        try{
-            $expiresAt = now()->addMinutes(120);
-            $scannerRequest = new ScannerRequest();
-            $scannerRequest->addEntityFilter($entityType, $entityFilter);
-            $cassandraObject = new CassandraQuery($scannerRequest);
+        $expiresAt = now()->addMinutes(120);
+        $scannerRequest = new ScannerRequest();
+        $scannerRequest->addEntityFilter($entityType, $entityFilter);
+        $cassandraObject = new CassandraQuery($scannerRequest);
+        $cassandraPagination = Cache::get('cassandra_pagination');
+        if($firstRequest){
+            if(is_null($cassandraPagination)){
+                $indexArray = ['index'=>[1=>null]];
+                ksort($indexArray);
+                Cache::put('cassandra_pagination',$indexArray,$expiresAt);
+            }
+            $response = $cassandraObject->fetchHackRecords(10,$entityType,$entityFilter);
             $cassandraPagination = Cache::get('cassandra_pagination');
-            if($firstRequest){
-                if(is_null($cassandraPagination)){
-                    $indexArray = ['index'=>[1=>null]];
-                    ksort($indexArray);
-                    Cache::put('cassandra_pagination',$indexArray,$expiresAt);
-                }
-                $response = $cassandraObject->fetchHackRecords(10,$entityType,$entityFilter);
-                $cassandraPagination = Cache::get('cassandra_pagination');
-                if(is_null($response['token'])) {
-                    $cassandraPagination['next'] = null;
-                    $cassandraPagination['previous'] = 0;
-                    $cassandraPagination['records'] = count($response['array']);
-                }else{
-                    $nextKey = key($cassandraPagination['index']) + 1;
-                    $cassandraPagination['next'] = $nextKey;
-                    $cassandraPagination['previous'] = null;
-                    $cassandraPagination['index'][$nextKey] = $response['token'];
-                    $cassandraPagination['records'] = count($response['array']) + 10;
-                }
-                ksort($cassandraPagination['index']);
-                Cache::put('cassandra_pagination',$cassandraPagination,$expiresAt);
+            if(is_null($response['token'])) {
+                $cassandraPagination['next'] = null;
+                $cassandraPagination['previous'] = 0;
+                $cassandraPagination['records'] = count($response['array']);
             }else{
-                $cassandraPagination = Cache::get('cassandra_pagination');
+                $nextKey = key($cassandraPagination['index']) + 1;
+                $cassandraPagination['next'] = $nextKey;
+                $cassandraPagination['previous'] = null;
+                $cassandraPagination['index'][$nextKey] = $response['token'];
+                $cassandraPagination['records'] = count($response['array']) + 10;
+            }
+            ksort($cassandraPagination['index']);
+            Cache::put('cassandra_pagination',$cassandraPagination,$expiresAt);
+        }else{
+            $cassandraPagination = Cache::get('cassandra_pagination');
+            if($forward){
+                $token = $cassandraPagination['index'][$cassandraPagination['next']];
+            }
+            if($backward){
+                $token = $cassandraPagination['index'][$cassandraPagination['previous']];
+            }
+            $response = $cassandraObject->fetchHackRecords(10,$entityType,$entityFilter,$token);
+            if(is_null($response['token'])){
+                $cassandraPagination['records'] = $cassandraPagination['records'];
+                $cassandraPagination['next'] = null;
+                ksort($cassandraPagination['index']);
+                end($cassandraPagination['index']);
+                if(is_null($cassandraPagination['previous'])){
+                    $cassandraPagination['previous'] = null;
+                }else{
+                    $cassandraPagination['previous'] = key($cassandraPagination['index']) - 1;
+                }
+            }else{
                 if($forward){
-                    $token = $cassandraPagination['index'][$cassandraPagination['next']];
-                }
-                if($backward){
-                    $token = $cassandraPagination['index'][$cassandraPagination['previous']];
-                }
-                $response = $cassandraObject->fetchHackRecords(10,$entityType,$entityFilter,$token);
-                if(is_null($response['token'])){
-                    $cassandraPagination['records'] = $cassandraPagination['records'];
-                    $cassandraPagination['next'] = null;
+                    $cassandraPagination['records'] += count($response['array']);
                     ksort($cassandraPagination['index']);
                     end($cassandraPagination['index']);
+                    $nextKey = key($cassandraPagination['index']) + 1;
+                    $cassandraPagination['next'] = $nextKey;
                     if(is_null($cassandraPagination['previous'])){
-                        $cassandraPagination['previous'] = null;
+                        $cassandraPagination['previous'] = 1;
                     }else{
-                        $cassandraPagination['previous'] = key($cassandraPagination['index']) - 1;
+                        $cassandraPagination['previous'] = $nextKey - 1;
                     }
-                }else{
-                    if($forward){
-                        $cassandraPagination['records'] += count($response['array']);
-                        ksort($cassandraPagination['index']);
-                        end($cassandraPagination['index']);
-                        $nextKey = key($cassandraPagination['index']) + 1;
-                        $cassandraPagination['next'] = $nextKey;
-                        if(is_null($cassandraPagination['previous'])){
-                            $cassandraPagination['previous'] = 1;
-                        }else{
-                            $cassandraPagination['previous'] = $nextKey - 1;
-                        }
-                        $cassandraPagination['index'][$nextKey] = $response['token'];
-                    }
-                    if($backward){
-                        $nextKey = $cassandraPagination['previous'] + 1;
-                        if(($nextKey - 1) > 1){
-                            $cassandraPagination['previous'] = $nextKey - 2;
-                            if(is_null($cassandraPagination['next'])){
-                                $cassandraPagination['records'] = $cassandraPagination['records'];
-                            }else{
-                                $cassandraPagination['records'] -= count($response['array']);
-                            }
-                        }else{
-                            $cassandraPagination['records'] = count($response['array']) + 10;
-                            $cassandraPagination['previous'] = null;
-                        }
-                        $cassandraPagination['next'] = $nextKey;
-                    }
+                    $cassandraPagination['index'][$nextKey] = $response['token'];
                 }
-                ksort($cassandraPagination['index']);
-                Cache::put('cassandra_pagination',$cassandraPagination,$expiresAt);
+                if($backward){
+                    $nextKey = $cassandraPagination['previous'] + 1;
+                    if(($nextKey - 1) > 1){
+                        $cassandraPagination['previous'] = $nextKey - 2;
+                        if(is_null($cassandraPagination['next'])){
+                            $cassandraPagination['records'] = $cassandraPagination['records'];
+                        }else{
+                            $cassandraPagination['records'] -= count($response['array']);
+                        }
+                    }else{
+                        $cassandraPagination['records'] = count($response['array']) + 10;
+                        $cassandraPagination['previous'] = null;
+                    }
+                    $cassandraPagination['next'] = $nextKey;
+                }
             }
-            Log::info("::next::".$cassandraPagination['next']."::previous::".$cassandraPagination['previous']."::records::".$cassandraPagination['records']);
-            return $response['array'];
-        }catch (\Exception $e){
-            Log::info($e);
-            dd($e);
+            ksort($cassandraPagination['index']);
+            Cache::put('cassandra_pagination',$cassandraPagination,$expiresAt);
         }
+        Log::info("::next::".$cassandraPagination['next']."::previous::".$cassandraPagination['previous']."::records::".$cassandraPagination['records']);
+        return $response['array'];
     }
 }
