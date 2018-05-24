@@ -30,12 +30,12 @@
                         </thead>
                         <tfoot>
                         <tr>
-                            <th>First name</th>
-                            <th>Last name</th>
-                            <th>Position</th>
-                            <th>Office</th>
-                            <th>Start date</th>
-                            <th>Salary</th>
+                            <th>Index</th>
+                            <th>Email</th>
+                            <th>Sourceid</th>
+                            <th>Email Domain</th>
+                            <th>Status</th>
+                            <th>Is Data Clean</th>
                         </tr>
                         </tfoot>
                     </table>
