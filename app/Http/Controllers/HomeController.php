@@ -117,7 +117,6 @@ class HomeController extends Controller
                     $token = $cassandraPagination['index'][$cassandraPagination['previous']];
                 }
                 $response = $cassandraObject->fetchHackRecords(10,$entityType,$entityFilter,$token);
-                //dd(key($cassandraPagination['index']),$cassandraPagination['index']);
                 if(is_null($response['token'])){
                     $cassandraPagination['records'] = $cassandraPagination['records'];
                     $cassandraPagination['next'] = null;
@@ -143,10 +142,6 @@ class HomeController extends Controller
                         $cassandraPagination['index'][$nextKey] = $response['token'];
                     }
                     if($backward){
-                        /*ksort($cassandraPagination['index']);
-                        end($cassandraPagination['index']);
-                        $nextKey = key($cassandraPagination['index']);
-                        $cassandraPagination['next'] = $nextKey;*/
                         $nextKey = $cassandraPagination['previous'] + 1;
                         if(($nextKey - 1) > 1){
                             $cassandraPagination['previous'] = $nextKey - 2;
