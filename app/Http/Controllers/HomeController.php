@@ -34,51 +34,67 @@ class HomeController extends Controller
 
     public function jsonData(Request $request)
     {
-        $expiresAt = now()->addMinutes(120);
-        $requestData = $request->all();
-        $firstRequest = false;
-        $forward = false;
-        $backward = false;
-        if(is_null(Cache::get('datatable_previous_page'))){
-            $firstRequest = true;
-            Cache::put('datatable_previous_page',$requestData['start'],$expiresAt);
-        }else{
-            if($requestData['start'] > Cache::get('datatable_previous_page')){
-                $forward = true;
+        try{
+            $expiresAt = now()->addMinutes(120);
+            $requestData = $request->all();
+            $firstRequest = false;
+            $forward = false;
+            $backward = false;
+            if(is_null(Cache::get('datatable_previous_page'))){
+                $firstRequest = true;
+                Cache::put('datatable_previous_page',$requestData['start'],$expiresAt);
             }else{
-                $backward = true;
+                if($requestData['start'] > Cache::get('datatable_previous_page')){
+                    $forward = true;
+                }else{
+                    $backward = true;
+                }
+                Cache::put('datatable_previous_page',$requestData['start'],$expiresAt);
             }
-            Cache::put('datatable_previous_page',$requestData['start'],$expiresAt);
-        }
 
-        $entityType = "email";
-        $entityFilter = "sagar@gmail.com";
-        $scannerRequest = new ScannerRequest();
-        $scannerRequest->addEntityFilter($entityType, $entityFilter);
-        $cassandraObject = new CassandraQuery($scannerRequest);
-        $response = $cassandraObject->getData($entityType,$entityFilter,$firstRequest,$forward,$backward);
-        $cassandraPagination = Cache::get('cassandra_pagination');
-        $total = $cassandraPagination['records'];
-        /*if(is_null($cassandraPagination['next'])){
-            $total = 10;
-        }*/
-        $index = 1;
-        foreach($response as $res){
-            $record['index'] = $index;
-            $record['email'] = $res['email'];
-            $record['sourceid'] =$res['sourceid'];
-            $record['emaildomain'] = $res['emaildomain'];
-            $record['status'] = $res['status'];
-            $record['isdataclean'] = $res['isdataclean'];
+            $entityType = "email";
+            $entityFilter = "sagar@gmail.com";
+            $scannerRequest = new ScannerRequest();
+            $scannerRequest->addEntityFilter($entityType, $entityFilter);
+            $cassandraObject = new CassandraQuery($scannerRequest);
+            $response = $cassandraObject->getData($entityType,$entityFilter,$firstRequest,$forward,$backward);
+            $cassandraPagination = Cache::get('cassandra_pagination');
+            $total = $cassandraPagination['records'];
+            /*if(is_null($cassandraPagination['next'])){
+                $total = 10;
+            }*/
+            $index = 1;
+            foreach($response as $res){
+                $record['index'] = $index;
+                $record['email'] = $res['email'];
+                $record['sourceid'] =$res['sourceid'];
+                $record['emaildomain'] = $res['emaildomain'];
+                $record['status'] = $res['status'];
+                $record['isdataclean'] = $res['isdataclean'];
+                $data[] = array_values($record);
+                $index++;
+            }
+            $finalData['draw'] = $requestData['draw'];
+            $finalData['recordsTotal'] = $total;
+            $finalData['iTotalRecords'] = $total;
+            $finalData['iTotalDisplayRecords'] = $total;
+            $finalData['recordsFiltered'] = $total;
+            $finalData['aaData'] = $data;
+        }catch (\Exception $e){
+            $record['index'] = "N/A";
+            $record['email'] = "N/A";
+            $record['sourceid'] = "N/A";
+            $record['emaildomain'] = "N/A";
+            $record['status'] = "N/A";
+            $record['isdataclean'] = "N/A";
             $data[] = array_values($record);
-            $index++;
+            $finalData['draw'] = $requestData['draw'];
+            $finalData['recordsTotal'] = 0;
+            $finalData['iTotalRecords'] = 0;
+            $finalData['iTotalDisplayRecords'] = 0;
+            $finalData['recordsFiltered'] = 0;
+            $finalData['aaData'] = $data;
         }
-        $finalData['draw'] = $requestData['draw'];
-        $finalData['recordsTotal'] = $total;
-        $finalData['iTotalRecords'] = $total;
-        $finalData['iTotalDisplayRecords'] = $total;
-        $finalData['recordsFiltered'] = $total;
-        $finalData['aaData'] = $data;
         return $finalData;
     }
 
