@@ -10,7 +10,8 @@
         "guzzlehttp/guzzle": "^6.3",
         "laravel/framework": "5.6.*",
         "laravel/tinker": "^1.0",
-        "maatwebsite/excel": "~2.1.0"
+        "maatwebsite/excel": "~2.1.0",
+        "heroic/scanner": "1.*"
     },
     "require-dev": {
         "filp/whoops": "^2.0",
@@ -60,5 +61,11 @@
         "optimize-autoloader": true
     },
     "minimum-stability": "dev",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@github.com:HeroicCybersecurity/scanner.git"
+        }
+    ]
 }
