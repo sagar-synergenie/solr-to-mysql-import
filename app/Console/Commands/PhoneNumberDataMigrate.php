@@ -81,7 +81,7 @@ class PhoneNumberDataMigrate extends Command
             'auth' => [$this->solrUsername, $this->solrPassword],
         ]);
         for($index = 1;$index <= $totalIteration; $index++){
-            Log::warning("Iteration:".$index);
+            Log::warning("Iteration::".$index."::start::".$start."::end::".$end);
             $url = $this->solrURL.$this->hackRecord."/select?q=$entityFilter&start=$start&rows=$end&df=$entityType&wt=json&indent=true";
             $response = $client->request("GET", $url);
             $body = $response->getBody();
@@ -105,7 +105,7 @@ class PhoneNumberDataMigrate extends Command
             }
             $start = $end + 1;
             $end = $end + env('CASSANDRA_PAGE_SIZE');
-            Log::warning("Iteration:".$index);
+            Log::warning("Iteration::".$index."::start::".$start."::end::".$end);
         }
         fclose($output);
     }
