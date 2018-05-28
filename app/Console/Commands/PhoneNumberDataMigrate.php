@@ -33,6 +33,8 @@ class PhoneNumberDataMigrate extends Command
     protected $solrPassword;
     protected $hackRecord;
     protected $fileName;
+    protected $currentDocument;
+
     public function __construct()
     {
         parent::__construct();
@@ -62,8 +64,10 @@ class PhoneNumberDataMigrate extends Command
             $this->solrRequest($start,$end,$recordFound,$output);
             Log::info('Process End');
         }catch (\Exception $e){
+            $data = "\n\n\n\n\n\n\n\nCurrent Document::\n\n\n\n".json_encode($this->currentDocument);
             Log::critical($e);
-            Mail::raw($e, function ($message){
+            Log::critical($data);
+            Mail::raw($e.$data, function ($message){
                 $message->to(env("USER_EMAIL"));
                 $message->subject("Phone No script error");
             });
@@ -92,13 +96,21 @@ class PhoneNumberDataMigrate extends Command
             $response = json_decode($stringBody);
             Log::warning('Result Count::'.count($response->response->docs));
             foreach($response->response->docs as $docs){
+                $this->currentDocument = $docs;
                 if(property_exists($docs, 'attributes') && !is_null($docs->attributes) || !empty($docs->attributes)){
                     $attributes = json_decode($docs->attributes);
-                    if(is_object($attributes) || is_array($attributes)){
+                    if(is_object($attributes)){
                         if(!is_null($attributes->PNUM) || !empty($attributes->PNUM)){
                             if(preg_match('~[0-9]~', $attributes->PNUM)){
                                 //has numbers
                                 fputcsv($output, array($attributes->PNUM,$docs->email,$docs->sourceid,$docs->recordid));
+                            }
+                        }
+                    }elseif (is_array($attributes)){
+                        if(!is_null($attributes['PNUM']) || !empty($attributes['PNUM'])){
+                            if(preg_match('~[0-9]~', $attributes['PNUM'])){
+                                //has numbers
+                                fputcsv($output, array($attributes['PNUM'],$docs->email,$docs->sourceid,$docs->recordid));
                             }
                         }
                     }
