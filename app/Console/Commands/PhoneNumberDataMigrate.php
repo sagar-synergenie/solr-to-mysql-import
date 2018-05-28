@@ -60,6 +60,7 @@ class PhoneNumberDataMigrate extends Command
             $output = fopen($csv,"w") or die("Can't open php://output");
             fputcsv($output, array('phonenumber','email','sourceid','recordid'));
             $this->solrRequest($start,$end,$recordFound,$output);
+            Log::info('Process End');
         }catch (\Exception $e){
             Log::critical($e);
             Mail::raw($e, function ($message){
