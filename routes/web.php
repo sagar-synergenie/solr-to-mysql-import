@@ -12,6 +12,8 @@
 */
 
 Route::get('/', function () {
+    dd(1);
     Artisan::call('cassandra-sql:import');
     //return view('welcome');
 });
+
