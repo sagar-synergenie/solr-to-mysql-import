@@ -57,7 +57,7 @@ class PhoneNumberDataMigrate extends Command
             $recordFound = $this->solrFirstRequest($start,$end);
             $end = env('CASSANDRA_PAGE_SIZE');
             $csv = storage_path("csv/$this->fileName");
-            $output = fopen($csv,"w") or die("Can't open php://output");
+            $output = fopen($csv,"a") or die("Can't open php://output");
             fputcsv($output, array('phonenumber','email','sourceid','recordid'));
             $this->solrRequest($start,$end,$recordFound,$output);
             Log::info('Process End');
@@ -81,7 +81,7 @@ class PhoneNumberDataMigrate extends Command
             'auth' => [$this->solrUsername, $this->solrPassword],
         ]);
         for($index = 1;$index <= $totalIteration; $index++){
-            Log::warning("Iteration::".$index."STARTED ::start::".$start."::end::".$end);
+            Log::warning("Iteration::".$index." STARTED ::start::".$start."::end::".$end);
             $url = $this->solrURL.$this->hackRecord."/select?q=$entityFilter&start=$start&rows=$end&df=$entityType&wt=json&indent=true";
             $response = $client->request("GET", $url);
             $body = $response->getBody();
@@ -90,6 +90,7 @@ class PhoneNumberDataMigrate extends Command
             // Explicitly cast the body to a string
             $stringBody = (string) $body;
             $response = json_decode($stringBody);
+            Log::warning('Result Count::'.count($response->response->docs));
             foreach($response->response->docs as $docs){
                 if(property_exists($docs, 'attributes') && !is_null($docs->attributes) || !empty($docs->attributes)){
                     $attributes = json_decode($docs->attributes);
@@ -103,9 +104,9 @@ class PhoneNumberDataMigrate extends Command
                     }
                 }
             }
-            $start = $end + 1;
-            $end = $end + env('CASSANDRA_PAGE_SIZE');
-            Log::warning("Iteration::".$index."END ::start::".$start."::end::".$end);
+            $start += $end + 1;
+            //$end = $end + env('CASSANDRA_PAGE_SIZE');
+            Log::warning("Iteration::".$index." ENDED");
         }
         fclose($output);
     }
