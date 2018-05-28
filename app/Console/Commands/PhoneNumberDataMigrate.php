@@ -91,7 +91,7 @@ class PhoneNumberDataMigrate extends Command
             $stringBody = (string) $body;
             $response = json_decode($stringBody);
             foreach($response->response->docs as $docs){
-                if(!is_null($docs->attributes) || !empty($docs->attributes)){
+                if(property_exists($docs, 'attributes') && !is_null($docs->attributes) || !empty($docs->attributes)){
                     $attributes = json_decode($docs->attributes);
                     if(is_object($attributes) || is_array($attributes)){
                         if(!is_null($attributes->PNUM) || !empty($attributes->PNUM)){
