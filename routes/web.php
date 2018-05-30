@@ -13,7 +13,7 @@
 
 Route::get('/', function () {
     dd(1);
-    Artisan::call('cassandra-sql:import');
+    //Artisan::call('phone-number:migrate');
     //return view('welcome');
 });
 

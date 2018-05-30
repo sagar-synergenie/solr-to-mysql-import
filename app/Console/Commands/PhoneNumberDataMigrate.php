@@ -65,6 +65,8 @@ class PhoneNumberDataMigrate extends Command
             $output = fopen($csv,"a") or die("Can't open php://output");
             if($start == 0){
                 fputcsv($output, array('phonenumber','email','sourceid','recordid'));
+            }else{
+                $recordFound = $recordFound - $start;
             }
             $this->solrRequest($start,$end,$recordFound,$output);
             Log::info('Process End');
@@ -81,9 +83,6 @@ class PhoneNumberDataMigrate extends Command
 
     public function solrRequest($start,$end,$recordFound,$output)
     {
-        if($start != 0){
-            $recordFound = $recordFound - $start;
-        }
         $totalIteration = ceil($recordFound / $end);
         $entityFilter = "PNUM";
         $entityType = "attributes";
