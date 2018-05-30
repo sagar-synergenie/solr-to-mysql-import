@@ -34,6 +34,8 @@ class PhoneNumberDataMigrate extends Command
     protected $hackRecord;
     protected $fileName;
     protected $currentDocument;
+    protected $start;
+    protected $end;
 
     public function __construct()
     {
@@ -57,14 +59,17 @@ class PhoneNumberDataMigrate extends Command
             $start = 0;
             $end = 10;
             $recordFound = $this->solrFirstRequest($start,$end);
-            $end = env('CASSANDRA_PAGE_SIZE');
+            $start = (int)env('START');
+            $end = (int)env('END');
             $csv = storage_path("csv/$this->fileName");
             $output = fopen($csv,"a") or die("Can't open php://output");
-            fputcsv($output, array('phonenumber','email','sourceid','recordid'));
+            if($start == 0){
+                fputcsv($output, array('phonenumber','email','sourceid','recordid'));
+            }
             $this->solrRequest($start,$end,$recordFound,$output);
             Log::info('Process End');
         }catch (\Exception $e){
-            $data = "\n\n\n\n\n\n\n\nCurrent Document::\n\n\n\n".json_encode($this->currentDocument);
+            $data = "\n\n\n\n\n\n\n\nCurrent Document::\n\n\n\n".json_encode($this->currentDocument)."\n\n\n\n"."START:".$this->start."END:".$this->end;
             Log::critical($e);
             Log::critical($data);
             Mail::raw($e.$data, function ($message){
@@ -76,6 +81,9 @@ class PhoneNumberDataMigrate extends Command
 
     public function solrRequest($start,$end,$recordFound,$output)
     {
+        if($start != 0){
+            $recordFound = $recordFound - $start;
+        }
         $totalIteration = ceil($recordFound / $end);
         $entityFilter = "PNUM";
         $entityType = "attributes";
@@ -86,6 +94,8 @@ class PhoneNumberDataMigrate extends Command
         ]);
         for($index = 1;$index <= $totalIteration; $index++){
             Log::warning("Iteration::".$index." STARTED ::start::".$start."::end::".$end);
+            $this->start = $start;
+            $this->end = $end;
             $url = $this->solrURL.$this->hackRecord."/select?q=$entityFilter&start=$start&rows=$end&df=$entityType&wt=json&indent=true";
             $response = $client->request("GET", $url);
             $body = $response->getBody();
