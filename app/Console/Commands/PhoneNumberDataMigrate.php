@@ -87,7 +87,7 @@ class PhoneNumberDataMigrate extends Command
         $entityFilter = "PNUM";
         $entityType = "attributes";
         //"http://204.12.216.194:8983/solr/hdb_new.hack_records/select?q=PNUM&df=attributes&wt=json&indent=true";
-
+        http://204.12.216.194:8983/solr/hdb_new.hack_records/select?q=PNUM&start=0&rows=10&fl=email%2Csourceid%2Crecordid%2Cattributes&df=attributes&wt=json&indent=true
         $client = new \GuzzleHttp\Client([
             'auth' => [$this->solrUsername, $this->solrPassword],
         ]);
@@ -95,7 +95,7 @@ class PhoneNumberDataMigrate extends Command
             Log::warning("Iteration::".$index." STARTED ::start::".$start."::end::".$end);
             $this->start = $start;
             $this->end = $end;
-            $url = $this->solrURL.$this->hackRecord."/select?q=$entityFilter&start=$start&rows=$end&df=$entityType&wt=json&indent=true";
+            $url = $this->solrURL.$this->hackRecord."/select?q=$entityFilter&start=$start&rows=$end&fl=email%2Csourceid%2Crecordid%2Cattributes&df=$entityType&wt=json&indent=true";
             $response = $client->request("GET", $url);
             $body = $response->getBody();
             // Implicitly cast the body to a string and echo it
@@ -103,6 +103,7 @@ class PhoneNumberDataMigrate extends Command
             // Explicitly cast the body to a string
             $stringBody = (string) $body;
             $response = json_decode($stringBody);
+            dd($response);
             Log::warning('Result Count::'.count($response->response->docs));
             foreach($response->response->docs as $docs){
                 $this->currentDocument = $docs;
