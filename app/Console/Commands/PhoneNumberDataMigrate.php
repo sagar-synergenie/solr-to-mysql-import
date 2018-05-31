@@ -103,7 +103,6 @@ class PhoneNumberDataMigrate extends Command
             // Explicitly cast the body to a string
             $stringBody = (string) $body;
             $response = json_decode($stringBody);
-            dd($response);
             Log::warning('Result Count::'.count($response->response->docs));
             foreach($response->response->docs as $docs){
                 $this->currentDocument = $docs;
