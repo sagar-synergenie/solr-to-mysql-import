@@ -13,4 +13,5 @@ yarn-error.log
 .env
 cassandra.log
 storage/csv/
+storage/cassandra/
 worker.log

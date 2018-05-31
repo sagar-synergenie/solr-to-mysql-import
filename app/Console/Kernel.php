@@ -17,6 +17,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\CassandraToMysqlImport',
         'App\Console\Commands\ImportHackSource',
         'App\Console\Commands\PhoneNumberDataMigrate',
+        'App\Console\Commands\PhoneNumberDataMigrateCassandra',
     ];
 
     /**
@@ -31,7 +32,8 @@ class Kernel extends ConsoleKernel
         //          ->hourly();
         //$schedule->command('mysql:import')->monthlyOn((int)env("CRON_DAY"), env("CRON_TIME"));
         //$schedule->command('cassandra-sql:import')->monthlyOn((int)env("CRON_DAY"), env("CRON_TIME"));
-        $schedule->command('phone-number:migrate')->monthlyOn((int)env("CRON_DAY"), env("CRON_TIME"));
+        //$schedule->command('phone-number:migrate')->monthlyOn((int)env("CRON_DAY"), env("CRON_TIME"));
+        $schedule->command('phone-number:cassandra-migrate')->monthlyOn((int)env("CRON_DAY"), env("CRON_TIME"));
     }
 
     /**
